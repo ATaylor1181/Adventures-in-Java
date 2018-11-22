@@ -1,4 +1,5 @@
 // character creation
+const story = function(){
 let name = prompt("What is the name of your character?")
 let gender = prompt("What gender is your character?")
 let race = prompt("What race is your character? (Human, Elf, Dwarf, Halfling)")
@@ -7,6 +8,14 @@ const mainHero = new Hero(name, 10, gender, race, characterRole)
 const heroParty = [mainHero]
 checkRace(mainHero, mainHero.race)
 checkClass(mainHero, mainHero.characterRole)
+console.log(mainHero)
+console.log(heroParty)
+console.log(`
+
+
+
+
+`)
 console.log(    `${mainHero.name} had been dreaming of adventure for years. Finally the day had come.
     ${mainHero.name} had been accepted to train as one of the ${mainHero.race} king's 
     champions. Heart pounding in anticipation, ${mainHero.name} entered the palace
@@ -91,3 +100,4 @@ checkClass(talrand, talrand.characterRole)
 checkRace(talrand, talrand.race)
 
 heroParty.push(talrand)
+}
