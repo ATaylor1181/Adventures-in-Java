@@ -9,7 +9,6 @@ let persuasionEncounter = (heroes, enemies) => {
     })
     return persuasionPower >= persuasionBarrier
 }
-
 let sneakEncounter = (heroes, enemies) => {
     let sneakBarrier = 0
     let sneakPower = 0
@@ -21,8 +20,6 @@ let sneakEncounter = (heroes, enemies) => {
     })
     return sneakPower >= sneakBarrier
 }
-
-
 const fightEncounter = (heroes, enemies, heroesFirst) => {
     let fighting = true
     let totalHeroes = heroes.length
@@ -45,7 +42,6 @@ const fightEncounter = (heroes, enemies, heroesFirst) => {
         }
     }
 }
-
 function teamAttack (attackers, defenders) {
     let totalIncapacitated = 0
     const totalAvailableDefenders = 0
@@ -58,9 +54,7 @@ function teamAttack (attackers, defenders) {
         if(attacker.isIncapacitated || totalAvailableDefenders === 0){
             return
         }
-
         let target, randomTargetIndex
-
         while(!target) {
             randomTargetIndex = Math.floor(Math.random() * defenders.length)
 
@@ -84,6 +78,28 @@ function teamAttack (attackers, defenders) {
     })
     return totalIncapacitated
 }
+const decisionMaker = (answer) => {
+    let lowerAnswer = answer.toLowerCase()
+
+    let result
+
+    switch(lowerAnswer){
+        case `attack`:
+        result = fightEncounter(heroParty, enemies, true)
+        break
+        case `sneak`:
+        result = sneakEncounter(heroParty, enemies)
+        break
+        case `persuade`:
+        result = persuasionEncounter(heroParty, enemies)
+        break
+        default:
+        return decisionMaker(promt(`Please make sure you spell the choice correctly. Attack, Sneak, or Persuade?`))
+        break
+    }
+    return result
+}
+
 
 const riddleEncounter = () => {
     let answer = promt(`I have a key but no lock, rivers with no water, and trees with no roots. What am I?`)
