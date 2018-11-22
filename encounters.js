@@ -84,3 +84,14 @@ function teamAttack (attackers, defenders) {
     })
     return totalIncapacitated
 }
+
+const riddleEncounter = () => {
+    let answer = promt(`I have a key but no lock, rivers with no water, and trees with no roots. What am I?`)
+    if(answer.toLowerCase() === `A map` || answer.toLowerCase() === `map`){
+        console.log(`Correct!`)
+        return true
+    } else {
+        console.log(`You got it wrong!`)
+        return false
+    }
+}
