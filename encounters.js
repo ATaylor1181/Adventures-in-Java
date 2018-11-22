@@ -1,4 +1,4 @@
-let persuasionEncounter = (heroes, enemies) => {
+const persuasionEncounter = (heroes, enemies) => {
     let persuasionBarrier = 0
     let persuasionPower = 0
     enemies.forEach(enemy => {
@@ -9,7 +9,7 @@ let persuasionEncounter = (heroes, enemies) => {
     })
     return persuasionPower >= persuasionBarrier
 }
-let sneakEncounter = (heroes, enemies) => {
+const sneakEncounter = (heroes, enemies) => {
     let sneakBarrier = 0
     let sneakPower = 0
     enemies.forEach(enemy => {
@@ -44,7 +44,7 @@ const fightEncounter = (heroes, enemies, heroesFirst) => {
 }
 function teamAttack (attackers, defenders) {
     let totalIncapacitated = 0
-    const totalAvailableDefenders = 0
+    let totalAvailableDefenders = 0
     defenders.forEach(defender => {
         if(!defender.isIncapacitated){
             totalAvailableDefenders++
