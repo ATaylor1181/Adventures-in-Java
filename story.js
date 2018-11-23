@@ -1,5 +1,255 @@
-// character creation
 const story = function(){
+
+class BaseCharacter {
+    constructor(name, health, skills = {attack: 0, sneak: 0, persuade: 0}) {
+        this.name = name
+        this.maxHealth = health
+        this.currentHealth = health
+        this.isIncapacitated = false
+        this.barriers = {
+            attack: 10,
+            sneak: 10,
+            persuade: 10
+        }
+        this.skills = skills
+    }
+
+    attack(){
+        return Math.floor(Math.random() * 20) + 1 + this.skills.attack
+    }
+    dealDamage(){
+        return Math.floor(Math.random() * (this.equippedWeapon.maxDamage - this.equippedWeapon.minDamage + 1)) + this.equippedWeapon.minDamage
+    }
+    persuade(){
+        return Math.floor(Math.random() * 20) + 1 + this.skills.persuasion
+    }
+    sneak(){
+        return Math.floor(Math.random() * 20) + 1 + this.skills.sneak
+    }
+}
+class Hero extends BaseCharacter {
+    constructor(name, health, gender, race, role, skills,
+        weapon = {
+            name: `none`,
+
+            minDamage: null,
+            maxDamage: null
+        }, armour = {
+            name: `none`,
+            attackBarrierBonus: null
+        }){
+        super(name, health, skills)
+        this.gender = gender
+        this.race = race
+        this.characterRole = role
+        this.equippedWeapon = weapon
+        this.equippedArmour = armour
+    }
+
+    levelUp(skill) {
+        this.maxHealth += Math.floor(Math.random() * 6) + 1
+        this.skills[skill] += 1
+    }
+    equipNewWeapon(newWeapon) {
+        this.equippedWeapon = newWeapon
+    }
+    equipNewArmour(newArmour){
+        this.equippedArmour = newArmour
+    }
+    rest(){
+        this.currentHealth = this.maxHealth
+        this.isIncapacitated = false
+    }
+}
+  
+const checkClass = (hero, characterClass) => {
+    let lowerCharacterClass = characterClass.toLowerCase()
+
+    switch (lowerCharacterClass) {
+        case `warrior`:
+            hero.skills.attack += 3
+            hero.skills.sneak--
+            break
+        case `ranger`:
+            hero.skills.attack++
+            hero.skills.persuade++
+            hero.skills.sneak++
+            break
+        case `rogue`:
+            hero.skills.sneak += 3
+            hero.skills.attack--
+            break
+        default:
+            characterClass = prompt(`"${characterClass}" is not a valid choice, please choose again`)
+            hero.characterRole = characterClass
+            checkClass(hero, characterClass)
+            break
+    }
+}
+
+const checkRace = (hero, race) => {
+    let lowerCaseRace = race.toLowerCase()
+
+    switch (lowerCaseRace) {
+        case `human`:
+            break
+        case `elf`:
+            hero.skills.persuade++
+            hero.barriers.persuade++
+            hero.skills.attack--
+            hero.barriers.sneak--
+            break
+        case `dwarf`:
+            hero.skills.attack++
+            hero.barriers.attack++
+            hero.skills.sneak--
+            hero.barriers.persuade--
+            break
+        case `halfling`:
+            hero.skills.sneak++
+            hero.barriers.sneak++
+            hero.skills.attack--
+            hero.barriers.persuade--
+            break
+        default:
+            race = prompt(`"${race}" is not a valid race. Please choose again`)
+            hero.race = race
+            checkRace(hero, race)
+            break
+    }
+}
+
+class Monster extends BaseCharacter {
+    constructor(name, health, attackBarrier, persuasionBarrier, sneakBarrier, skills, minDamage, maxDamage){
+        super(name, health, skills)
+        this.barriers.attackBarrier = attackBarrier
+        this.barriers.persuade = persuasionBarrier
+        this.barriers.sneak = sneakBarrier
+        this.equippedWeapon = {
+            minDamage: minDamage,
+            maxDamage: maxDamage
+        }
+    }
+}
+
+
+const persuasionEncounter = (heroes, enemies) => {
+    let persuasionBarrier = 0
+    let persuasionPower = 0
+    enemies.forEach(enemy => {
+        persuasionBarrier += enemy.barriers.persuade
+    })
+    heroes.forEach(hero => {
+        persuasionPower += hero.persuade()
+    })
+    return persuasionPower >= persuasionBarrier
+}
+const sneakEncounter = (heroes, enemies) => {
+    let sneakBarrier = 0
+    let sneakPower = 0
+    enemies.forEach(enemy => {
+        sneakBarrier += enemy.barriers.sneak
+    })
+    heroes.forEach(hero => {
+        sneakPower += hero.sneak()
+    })
+    return sneakPower >= sneakBarrier
+}
+const fightEncounter = (heroes, enemies, heroesFirst) => {
+    let fighting = true
+    let totalHeroes = heroes.length
+    let totalEnemies = enemies.length
+    while(fighting){
+        if(heroesFirst){
+            totalEnemies -= teamAttack(heroes, enemies)
+            totalHeroes -= teamAttack(enemies, heroes)
+        } else {
+            totalHeroes -= teamAttack(enemies, heroes)
+            totalEnemies -= teamAttack(heroes, enemies)
+        }
+        if(totalHeroes === 0){
+            console.log(`All heroes are incapacitated.`)
+            return false
+        }
+        if(totalEnemies === 0){
+            console.log(`All enemies have been defeated.`)
+            return true
+        }
+    }
+}
+function teamAttack (attackers, defenders) {
+    let totalIncapacitated = 0
+    let totalAvailableDefenders = 0
+    defenders.forEach(defender => {
+        if(!defender.isIncapacitated){
+            totalAvailableDefenders++
+        }
+    })
+    attackers.forEach(attacker => {
+        if(attacker.isIncapacitated || totalAvailableDefenders === 0){
+            return
+        }
+        let target, randomTargetIndex
+        while(!target) {
+            randomTargetIndex = Math.floor(Math.random() * defenders.length)
+
+            if(!defenders[randomTargetIndex].isIncapacitated){
+                target = defenders[randomTargetIndex]
+            }
+        }
+        if(attacker.attack() >= target.barriers.attack){
+            let damage = attacker.dealDamage()
+            target.currentHealth -= damage
+            console.log(`${attacker.name} (Current Health: ${attacker.currentHealth}) hit ${target.name} for ${damage} (current health: ${target.currentHealth})`)
+            if(target.currentHealth <= 0){
+                console.log(`${target.name} is incapacitated!`)
+                target.isIncapacitated = true
+                totalIncapacitated++
+                totalAvailableDefenders--
+            }
+        } else {
+            console.log(`${attacker.name} missed!`)
+        }
+    })
+    return totalIncapacitated
+}
+const decisionMaker = (answer) => {
+    let lowerAnswer = answer.toLowerCase()
+
+    let result
+
+    switch(lowerAnswer){
+        case `attack`:
+        result = fightEncounter(heroParty, enemies, true)
+        break
+        case `sneak`:
+        result = sneakEncounter(heroParty, enemies)
+        break
+        case `persuade`:
+        result = persuasionEncounter(heroParty, enemies)
+        break
+        default:
+        return decisionMaker(promt(`Please make sure you spell the choice correctly. Attack, Sneak, or Persuade?`))
+        break
+                
+    }
+    return result
+}
+
+
+const riddleEncounter = () => {
+    let answer = promt(`I have a key but no lock, rivers with no water, and trees with no roots. What am I?`)
+    if(answer.toLowerCase() === `A map` || answer.toLowerCase() === `map`){
+        console.log(`Correct!`)
+        return true
+    } else {
+        console.log(`You got it wrong!`)
+        return false
+    }
+}
+
+
+// character creation
 let name = prompt("What is the name of your character?")
 let gender = prompt("What gender is your character?")
 let race = prompt("What race is your character? (Human, Elf, Dwarf, Halfling)")
@@ -8,8 +258,6 @@ const mainHero = new Hero(name, 10, gender, race, characterRole)
 const heroParty = [mainHero]
 checkRace(mainHero, mainHero.race)
 checkClass(mainHero, mainHero.characterRole)
-console.log(mainHero)
-console.log(heroParty)
 console.log(`
 
 
@@ -59,13 +307,13 @@ if(victorious) {
 
 
 //add other party members down here
-const talrand = new Hero(`Talrand`, 10, `Male`, `Human`, `Warrior`,
-                        {attack:6, sneak: 2, persuade: 1},
-                        {name:`Broadsword`, minDamage:2, maxDamage:8},
-                        {name:`Chainmail`, attackBarrierBonus: 5})
+// const talrand = new Hero(`Talrand`, 10, `Male`, `Human`, `Warrior`,
+//                         {attack:6, sneak: 2, persuade: 1},
+//                         {name:`Broadsword`, minDamage:2, maxDamage:8},
+//                         {name:`Chainmail`, attackBarrierBonus: 5})
 
-checkClass(talrand, talrand.characterRole)
-checkRace(talrand, talrand.race)
+// checkClass(talrand, talrand.characterRole)
+// checkRace(talrand, talrand.race)
 
-heroParty.push(talrand)
+// heroParty.push(talrand)
 }

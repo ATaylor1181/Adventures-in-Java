@@ -96,6 +96,7 @@ const decisionMaker = (answer) => {
         default:
         return decisionMaker(promt(`Please make sure you spell the choice correctly. Attack, Sneak, or Persuade?`))
         break
+                
     }
     return result
 }
